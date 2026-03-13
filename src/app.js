@@ -7,6 +7,7 @@ const authMiddleware = require('./middleware/authMiddleware');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 const authRoutes = require('./routes/authRoutes');
+const healthRoutes = require('./routes/healthRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
 const workerRoutes = require('./routes/workerRoutes');
 const workEntryRoutes = require('./routes/workEntryRoutes');
@@ -20,6 +21,7 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 
+app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/departments', authMiddleware, departmentRoutes);
 app.use('/api/workers', authMiddleware, workerRoutes);
