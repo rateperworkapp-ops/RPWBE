@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum PaymentType {
+  kg
+  piece
+}
+
+enum PayoutPeriodType {
+  weekly
+  monthly
+}
+
+enum PayoutStatus {
+  pending
+  paid
+}
+
+model User {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email         String   @unique @db.Text
+  password_hash String   @db.Text
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+
+  @@map("users")
+}
+
+model Department {
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String      @db.Text
+  payment_type PaymentType
+  rate         Decimal     @db.Decimal(12, 2)
+  created_at   DateTime    @default(now()) @db.Timestamp(6)
+  workers      Worker[]
+
+  @@map("departments")
+}
+
+model Worker {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String         @db.Text
+  department_id  String         @db.Uuid
+  created_at     DateTime       @default(now()) @db.Timestamp(6)
+  department     Department     @relation(fields: [department_id], references: [id], onDelete: Restrict)
+  work_entries   WorkEntry[]
+  salary_payouts SalaryPayout[]
+
+  @@index([department_id], map: "idx_workers_department_id")
+  @@map("workers")
+}
+
+model WorkEntry {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  worker_id  String   @db.Uuid
+  work_date  DateTime @db.Date
+  quantity   Decimal  @db.Decimal(12, 2)
+  rate       Decimal  @db.Decimal(12, 2)
+  amount     Decimal  @db.Decimal(12, 2)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  worker     Worker   @relation(fields: [worker_id], references: [id], onDelete: Cascade)
+
+  @@index([worker_id], map: "idx_work_entries_worker_id")
+  @@index([work_date], map: "idx_work_entries_work_date")
+  @@index([worker_id, work_date], map: "idx_work_entries_worker_id_work_date")
+  @@map("work_entries")
+}
+
+model SalaryPayout {
+  id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  worker_id     String           @db.Uuid
+  period_type   PayoutPeriodType
+  period_start  DateTime         @db.Date
+  period_end    DateTime         @db.Date
+  total_quantity Decimal         @db.Decimal(12, 2)
+  total_amount  Decimal          @db.Decimal(12, 2)
+  status        PayoutStatus     @default(pending)
+  paid_at       DateTime?        @db.Timestamp(6)
+  created_at    DateTime         @default(now()) @db.Timestamp(6)
+  worker        Worker           @relation(fields: [worker_id], references: [id], onDelete: Cascade)
+
+  @@unique([worker_id, period_type, period_start, period_end])
+  @@index([worker_id], map: "idx_salary_payouts_worker_id")
+  @@index([period_type], map: "idx_salary_payouts_period_type")
+  @@index([status], map: "idx_salary_payouts_status")
+  @@index([period_start, period_end], map: "idx_salary_payouts_period_start_period_end")
+  @@map("salary_payouts")
+}
