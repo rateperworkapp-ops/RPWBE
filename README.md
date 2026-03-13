@@ -56,7 +56,9 @@ npm run prisma:seed
 ```
 
 ## Production Deploy (Neon)
-Run schema migrations in deployment environment:
+Run schema migrations in deployment environment.
+
+For Render, use `npm start` as the Start Command so Prisma runs `prisma migrate deploy` before the server boots:
 
 ```bash
 npm run prisma:deploy
@@ -159,3 +161,4 @@ curl -X POST http://localhost:5000/api/payouts/generate \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{"worker_id":"WORKER_UUID","period_type":"weekly","period_start":"2026-03-01","period_end":"2026-03-07"}'
 ```
+
