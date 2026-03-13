@@ -16,7 +16,10 @@ const createWorker = async (req, res, next) => {
 
 const getWorkers = async (req, res, next) => {
   try {
-    const workers = await workerService.getWorkers();
+    const workers = await workerService.getWorkers({
+      search: req.query.search,
+      department_id: req.query.department_id
+    });
 
     return res.status(200).json({
       success: true,

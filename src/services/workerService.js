@@ -36,8 +36,22 @@ const createWorker = async ({ name, department_id }) => {
   });
 };
 
-const getWorkers = async () => {
+const getWorkers = async ({ search, department_id } = {}) => {
+  const where = {};
+
+  if (search) {
+    where.name = {
+      contains: search,
+      mode: 'insensitive'
+    };
+  }
+
+  if (department_id) {
+    where.department_id = department_id;
+  }
+
   const workers = await prisma.worker.findMany({
+    where,
     include: {
       department: {
         select: {

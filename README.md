@@ -111,6 +111,7 @@ There is no default manager account unless you run the optional seed script.
 ### Workers
 - `POST /api/workers`
 - `GET /api/workers`
+- Optional worker query params: `search`, `department_id`
 - `GET /api/workers/:id`
 - `PUT /api/workers/:id`
 - `DELETE /api/workers/:id`
@@ -161,4 +162,5 @@ curl -X POST http://localhost:5000/api/payouts/generate \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{"worker_id":"WORKER_UUID","period_type":"weekly","period_start":"2026-03-01","period_end":"2026-03-07"}'
 ```
+
 

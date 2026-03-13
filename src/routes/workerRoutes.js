@@ -1,5 +1,5 @@
 const express = require('express');
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
 
 const workerController = require('../controllers/workerController');
 const validateRequest = require('../middleware/validateRequest');
@@ -26,8 +26,20 @@ const workerBodyValidators = [
     .withMessage('department_id must be a valid UUID')
 ];
 
+const workerQueryValidators = [
+  query('search')
+    .optional({ values: 'falsy' })
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('search must be at most 100 characters'),
+  query('department_id')
+    .optional({ values: 'falsy' })
+    .isUUID()
+    .withMessage('department_id must be a valid UUID')
+];
+
 router.post('/', workerBodyValidators, validateRequest, workerController.createWorker);
-router.get('/', workerController.getWorkers);
+router.get('/', workerQueryValidators, validateRequest, workerController.getWorkers);
 router.get('/:id', idValidator, validateRequest, workerController.getWorkerById);
 router.put('/:id', [...idValidator, ...workerBodyValidators], validateRequest, workerController.updateWorker);
 router.delete('/:id', idValidator, validateRequest, workerController.deleteWorker);
